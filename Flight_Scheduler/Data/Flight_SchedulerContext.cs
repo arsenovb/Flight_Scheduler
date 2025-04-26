@@ -16,5 +16,8 @@ namespace Flight_Scheduler.Data
 
         public DbSet<Flight_Scheduler.Models.Airline> Airline { get; set; } = default!;
         public DbSet<Flight_Scheduler.Models.Flight> Flight { get; set; } = default!;
+
+        public DbSet<Aircraft> Aircrafts { get; set; } = default!;
+        public DbSet<FlightCrew> FlightCrews { get; set; } = default!;
     }
 }

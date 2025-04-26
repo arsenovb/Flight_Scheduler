@@ -10,23 +10,22 @@ using Flight_Scheduler.Models;
 
 namespace Flight_Scheduler.Controllers
 {
-    public class FlightsController : Controller
+    public class AircraftController : Controller
     {
         private readonly Flight_SchedulerContext _context;
 
-        public FlightsController(Flight_SchedulerContext context)
+        public AircraftController(Flight_SchedulerContext context)
         {
             _context = context;
         }
 
-        // GET: Flights
+        // GET: Aircraft
         public async Task<IActionResult> Index()
         {
-            var flight_SchedulerContext = _context.Flight.Include(f => f.Airlines);
-            return View(await flight_SchedulerContext.ToListAsync());
+            return View(await _context.Aircrafts.ToListAsync());
         }
 
-        // GET: Flights/Details/5
+        // GET: Aircraft/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -34,46 +33,39 @@ namespace Flight_Scheduler.Controllers
                 return NotFound();
             }
 
-            var flight = await _context.Flight
-                .Include(f => f.Airlines)
+            var aircraft = await _context.Aircrafts
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (flight == null)
+            if (aircraft == null)
             {
                 return NotFound();
             }
 
-            return View(flight);
+            return View(aircraft);
         }
 
-        // GET: Flights/Create
+        // GET: Aircraft/Create
         public IActionResult Create()
         {
-            ViewData["AirlineId"] = new SelectList(_context.Airline, "Id", "Name");
-            ViewData["AircraftId"] = new SelectList(_context.Aircrafts, "Id", "Model");
-            ViewData["FlightCrewId"] = new SelectList(_context.FlightCrews, "Id", "FirstName");
             return View();
         }
 
-        // POST: Flights/Create
+        // POST: Aircraft/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Origin,Destination,Gate,AirlineId, AircraftId, FlightCrewId")] Flight flight)
+        public async Task<IActionResult> Create([Bind("Id,Model,CrewCapacity,PassengerCapacity,FuelTankCapacity")] Aircraft aircraft)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(flight);
+                _context.Add(aircraft);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["AirlineId"] = new SelectList(_context.Airline, "Id", "Name", flight.AirlineId);
-            ViewData["AircraftId"] = new SelectList(_context.Airline, "Id", "Model", flight.AirlineId);
-            ViewData["FlightCrewId"] = new SelectList(_context.Airline, "Id", "FirstName", flight.AirlineId);
-            return View(flight);
+            return View(aircraft);
         }
 
-        // GET: Flights/Edit/5
+        // GET: Aircraft/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -81,23 +73,22 @@ namespace Flight_Scheduler.Controllers
                 return NotFound();
             }
 
-            var flight = await _context.Flight.FindAsync(id);
-            if (flight == null)
+            var aircraft = await _context.Aircrafts.FindAsync(id);
+            if (aircraft == null)
             {
                 return NotFound();
             }
-            ViewData["AirlineId"] = new SelectList(_context.Airline, "Id", "Id", flight.AirlineId);
-            return View(flight);
+            return View(aircraft);
         }
 
-        // POST: Flights/Edit/5
+        // POST: Aircraft/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Origin,Destination,Gate,AirlineId")] Flight flight)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Model,CrewCapacity,PassengerCapacity,FuelTankCapacity")] Aircraft aircraft)
         {
-            if (id != flight.Id)
+            if (id != aircraft.Id)
             {
                 return NotFound();
             }
@@ -106,12 +97,12 @@ namespace Flight_Scheduler.Controllers
             {
                 try
                 {
-                    _context.Update(flight);
+                    _context.Update(aircraft);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!FlightExists(flight.Id))
+                    if (!AircraftExists(aircraft.Id))
                     {
                         return NotFound();
                     }
@@ -122,11 +113,10 @@ namespace Flight_Scheduler.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["AirlineId"] = new SelectList(_context.Airline, "Id", "Id", flight.AirlineId);
-            return View(flight);
+            return View(aircraft);
         }
 
-        // GET: Flights/Delete/5
+        // GET: Aircraft/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -134,35 +124,34 @@ namespace Flight_Scheduler.Controllers
                 return NotFound();
             }
 
-            var flight = await _context.Flight
-                .Include(f => f.Airlines)
+            var aircraft = await _context.Aircrafts
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (flight == null)
+            if (aircraft == null)
             {
                 return NotFound();
             }
 
-            return View(flight);
+            return View(aircraft);
         }
 
-        // POST: Flights/Delete/5
+        // POST: Aircraft/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var flight = await _context.Flight.FindAsync(id);
-            if (flight != null)
+            var aircraft = await _context.Aircrafts.FindAsync(id);
+            if (aircraft != null)
             {
-                _context.Flight.Remove(flight);
+                _context.Aircrafts.Remove(aircraft);
             }
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool FlightExists(int id)
+        private bool AircraftExists(int id)
         {
-            return _context.Flight.Any(e => e.Id == id);
+            return _context.Aircrafts.Any(e => e.Id == id);
         }
     }
 }
