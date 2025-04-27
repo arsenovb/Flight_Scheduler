@@ -22,7 +22,7 @@ namespace Flight_Scheduler.Controllers
         // GET: Flights
         public async Task<IActionResult> Index()
         {
-            var flight_SchedulerContext = _context.Flight.Include(f => f.Airlines);
+            var flight_SchedulerContext = _context.Flight.Include(f => f.Aircraft).Include(f => f.Airlines).Include(f => f.FlightCrew);
             return View(await flight_SchedulerContext.ToListAsync());
         }
 
@@ -35,7 +35,9 @@ namespace Flight_Scheduler.Controllers
             }
 
             var flight = await _context.Flight
+                .Include(f => f.Aircraft)
                 .Include(f => f.Airlines)
+                .Include(f => f.FlightCrew)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (flight == null)
             {
@@ -48,8 +50,8 @@ namespace Flight_Scheduler.Controllers
         // GET: Flights/Create
         public IActionResult Create()
         {
-            ViewData["AirlineId"] = new SelectList(_context.Airline, "Id", "Name");
             ViewData["AircraftId"] = new SelectList(_context.Aircrafts, "Id", "Model");
+            ViewData["AirlineId"] = new SelectList(_context.Airline, "Id", "Name");
             ViewData["FlightCrewId"] = new SelectList(_context.FlightCrews, "Id", "FirstName");
             return View();
         }
@@ -59,7 +61,7 @@ namespace Flight_Scheduler.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Origin,Destination,Gate,AirlineId, AircraftId, FlightCrewId")] Flight flight)
+        public async Task<IActionResult> Create([Bind("Id,Origin,Destination,Gate,AirlineId,AircraftId,FlightCrewId")] Flight flight)
         {
             if (ModelState.IsValid)
             {
@@ -67,9 +69,9 @@ namespace Flight_Scheduler.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["AirlineId"] = new SelectList(_context.Airline, "Id", "Name", flight.AirlineId);
-            ViewData["AircraftId"] = new SelectList(_context.Airline, "Id", "Model", flight.AirlineId);
-            ViewData["FlightCrewId"] = new SelectList(_context.Airline, "Id", "FirstName", flight.AirlineId);
+            ViewData["AircraftId"] = new SelectList(_context.Aircrafts, "Id", "Id", flight.AircraftId);
+            ViewData["AirlineId"] = new SelectList(_context.Airline, "Id", "Id", flight.AirlineId);
+            ViewData["FlightCrewId"] = new SelectList(_context.FlightCrews, "Id", "Id", flight.FlightCrewId);
             return View(flight);
         }
 
@@ -86,7 +88,9 @@ namespace Flight_Scheduler.Controllers
             {
                 return NotFound();
             }
-            ViewData["AirlineId"] = new SelectList(_context.Airline, "Id", "Id", flight.AirlineId);
+            ViewData["AircraftId"] = new SelectList(_context.Aircrafts, "Id", "Model", flight.AircraftId);
+            ViewData["AirlineId"] = new SelectList(_context.Airline, "Id", "Name", flight.AirlineId);
+            ViewData["FlightCrewId"] = new SelectList(_context.FlightCrews, "Id", "FirstName", flight.FlightCrewId);
             return View(flight);
         }
 
@@ -95,7 +99,7 @@ namespace Flight_Scheduler.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Origin,Destination,Gate,AirlineId")] Flight flight)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Origin,Destination,Gate,AirlineId,AircraftId,FlightCrewId")] Flight flight)
         {
             if (id != flight.Id)
             {
@@ -122,7 +126,9 @@ namespace Flight_Scheduler.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+            ViewData["AircraftId"] = new SelectList(_context.Aircrafts, "Id", "Id", flight.AircraftId);
             ViewData["AirlineId"] = new SelectList(_context.Airline, "Id", "Id", flight.AirlineId);
+            ViewData["FlightCrewId"] = new SelectList(_context.FlightCrews, "Id", "Id", flight.FlightCrewId);
             return View(flight);
         }
 
@@ -135,7 +141,9 @@ namespace Flight_Scheduler.Controllers
             }
 
             var flight = await _context.Flight
+                .Include(f => f.Aircraft)
                 .Include(f => f.Airlines)
+                .Include(f => f.FlightCrew)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (flight == null)
             {
