@@ -5,8 +5,17 @@
         public int Id { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public int Age { get; set; }
-        public string Position { get; set; }
+        public int? Age { get; set; } 
+        public CrewPosition Position { get; set; }
+
+        public enum CrewPosition 
+        {
+            Captain,  
+            FirstOfficer,
+            FlightEngineer,
+            Purser,
+            FlightAttendant
+        }
 
         public virtual ICollection<Flight>? Flights { get; set; }
     }
