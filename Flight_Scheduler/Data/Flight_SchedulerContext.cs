@@ -19,5 +19,14 @@ namespace Flight_Scheduler.Data
 
         public DbSet<Aircraft> Aircrafts { get; set; } = default!;
         public DbSet<FlightCrew> FlightCrews { get; set; } = default!;
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<FlightCrew>()
+                .Property(fc => fc.Position)
+                .HasConversion<string>(); 
+        }
     }
 }
