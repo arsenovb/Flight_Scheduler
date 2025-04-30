@@ -22,6 +22,22 @@ namespace Flight_Scheduler.Controllers
         {
             return View();
         }
+        //public IActionResult Flights()
+        //{
+        //    return View();
+        //}
+        //public IActionResult Airlines()
+        //{
+        //    return View();
+        //}
+        //public IActionResult Aircraft()
+        //{
+        //    return View();
+        //}
+        public IActionResult FlightCrews()
+        {
+            return View();
+        }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
