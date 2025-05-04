@@ -20,3 +20,87 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f9f9f9;
+    padding: 20px;
+}
+
+h1 {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 1rem;
+}
+.button-create {
+    font-size: large;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    text-decoration: none;
+    text-align: center;
+    border-radius: 10px;
+    display: inline-block;
+    padding: 10px 15px;
+    background-color: darkslategray;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.button-create:hover {
+    background-color:black;
+    color:white
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.table th, .table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.table thead {
+    background-color: #f1f1f1;
+}
+
+.table tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+.table td a {
+    padding: 5px;
+    color: black;
+    border-radius: 3px;
+    text-decoration: none;
+    font-weight:500;
+    transition: background-color 0.3s ease;
+}
+
+.table td a:hover {
+    background-color: darkslategray;
+    color: white
+}
+
+.navbar {
+    border-radius: 15px;
+}
+
+.a{
+    text-decoration:none;
+    color:black;
+    
+}
