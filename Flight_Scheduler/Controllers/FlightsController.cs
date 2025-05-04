@@ -61,7 +61,7 @@ namespace Flight_Scheduler.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Origin,Destination,Gate,AirlineId,AircraftId,FlightCrewId")] Flight flight)
+        public async Task<IActionResult> Create([Bind("Id,Origin,Destination,DepartureTime,ArrivalTime,Gate,AirlineId,AircraftId,FlightCrewId")] Flight flight)
         {
             if (ModelState.IsValid)
             {
@@ -99,7 +99,7 @@ namespace Flight_Scheduler.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Origin,Destination,Gate,AirlineId,AircraftId,FlightCrewId")] Flight flight)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Origin,Destination,DepartureTime,ArrivalTime,Gate,AirlineId,AircraftId,FlightCrewId")] Flight flight)
         {
             if (id != flight.Id)
             {
