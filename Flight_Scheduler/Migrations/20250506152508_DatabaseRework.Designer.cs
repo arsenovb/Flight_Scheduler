@@ -4,6 +4,7 @@ using Flight_Scheduler.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Flight_Scheduler.Migrations
 {
     [DbContext(typeof(Flight_SchedulerContext))]
-    partial class Flight_SchedulerContextModelSnapshot : ModelSnapshot
+    [Migration("20250506152508_DatabaseRework")]
+    partial class DatabaseRework
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -100,58 +103,6 @@ namespace Flight_Scheduler.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Destinations");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "John F. Kennedy (JFK), New York"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "Los Angeles International (LAX), Los Angeles"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Name = "Hartsfield-Jackson Atlanta (ATL), Atlanta"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Name = "Heathrow Airport (LHR), London"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Name = "Charles de Gaulle (CDG), Paris"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Name = "Tokyo Haneda (HND), Tokyo"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            Name = "Dubai International (DXB), Dubai"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            Name = "Sydney Airport (SYD), Sydney"
-                        },
-                        new
-                        {
-                            Id = 9,
-                            Name = "Changi Airport (SIN), Singapore"
-                        },
-                        new
-                        {
-                            Id = 10,
-                            Name = "Hong Kong International (HKG), Hong Kong"
-                        });
                 });
 
             modelBuilder.Entity("Flight_Scheduler.Models.Flight", b =>

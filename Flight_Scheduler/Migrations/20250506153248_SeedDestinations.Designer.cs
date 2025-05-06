@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Flight_Scheduler.Migrations
 {
     [DbContext(typeof(Flight_SchedulerContext))]
-    [Migration("20250506095321_AddFlightCrewAvailabilityAndRelationship")]
-    partial class AddFlightCrewAvailabilityAndRelationship
+    [Migration("20250506153248_SeedDestinations")]
+    partial class SeedDestinations
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -87,6 +87,76 @@ namespace Flight_Scheduler.Migrations
                     b.ToTable("Airline");
                 });
 
+            modelBuilder.Entity("Flight_Scheduler.Models.Destination", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Destinations");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "John F. Kennedy (JFK), New York"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Los Angeles International (LAX), Los Angeles"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Hartsfield-Jackson Atlanta (ATL), Atlanta"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Heathrow Airport (LHR), London"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "Charles de Gaulle (CDG), Paris"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Name = "Tokyo Haneda (HND), Tokyo"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Name = "Dubai International (DXB), Dubai"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Name = "Sydney Airport (SYD), Sydney"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Name = "Changi Airport (SIN), Singapore"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Name = "Hong Kong International (HKG), Hong Kong"
+                        });
+                });
+
             modelBuilder.Entity("Flight_Scheduler.Models.Flight", b =>
                 {
                     b.Property<int>("Id")
@@ -107,9 +177,8 @@ namespace Flight_Scheduler.Migrations
                     b.Property<DateTime>("DepartureTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Destination")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("DestinationId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Gate")
                         .IsRequired()
@@ -124,6 +193,8 @@ namespace Flight_Scheduler.Migrations
                     b.HasIndex("AircraftId");
 
                     b.HasIndex("AirlineId");
+
+                    b.HasIndex("DestinationId");
 
                     b.ToTable("Flight");
                 });
@@ -188,9 +259,17 @@ namespace Flight_Scheduler.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Flight_Scheduler.Models.Destination", "Destination")
+                        .WithMany("Flights")
+                        .HasForeignKey("DestinationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Aircraft");
 
                     b.Navigation("Airlines");
+
+                    b.Navigation("Destination");
                 });
 
             modelBuilder.Entity("Flight_Scheduler.Models.Aircraft", b =>
@@ -199,6 +278,11 @@ namespace Flight_Scheduler.Migrations
                 });
 
             modelBuilder.Entity("Flight_Scheduler.Models.Airline", b =>
+                {
+                    b.Navigation("Flights");
+                });
+
+            modelBuilder.Entity("Flight_Scheduler.Models.Destination", b =>
                 {
                     b.Navigation("Flights");
                 });

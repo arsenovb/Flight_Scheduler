@@ -15,11 +15,13 @@ namespace Flight_Scheduler.Controllers
             _context = context;
         }
 
+
         public async Task<IActionResult> Index()
         {
             var flights = await _context.Flight
                 .Include(f => f.Airlines)
                 .Include(f => f.Aircraft)
+                .Include(f => f.Destination)
                 .ToListAsync();
 
             return View(flights);

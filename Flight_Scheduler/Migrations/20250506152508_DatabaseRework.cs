@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Flight_Scheduler.Migrations
 {
     /// <inheritdoc />
-    public partial class AddFlightCrewAvailabilityAndRelationship : Migration
+    public partial class DatabaseRework : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -42,6 +42,19 @@ namespace Flight_Scheduler.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Destinations",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Destinations", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "FlightCrews",
                 columns: table => new
                 {
@@ -65,7 +78,7 @@ namespace Flight_Scheduler.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Origin = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Destination = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DestinationId = table.Column<int>(type: "int", nullable: false),
                     DepartureTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ArrivalTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Gate = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -85,6 +98,12 @@ namespace Flight_Scheduler.Migrations
                         name: "FK_Flight_Airline_AirlineId",
                         column: x => x.AirlineId,
                         principalTable: "Airline",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Flight_Destinations_DestinationId",
+                        column: x => x.DestinationId,
+                        principalTable: "Destinations",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -124,6 +143,11 @@ namespace Flight_Scheduler.Migrations
                 column: "AirlineId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Flight_DestinationId",
+                table: "Flight",
+                column: "DestinationId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_FlightFlightCrew_FlightsId",
                 table: "FlightFlightCrew",
                 column: "FlightsId");
@@ -146,6 +170,9 @@ namespace Flight_Scheduler.Migrations
 
             migrationBuilder.DropTable(
                 name: "Airline");
+
+            migrationBuilder.DropTable(
+                name: "Destinations");
         }
     }
 }
