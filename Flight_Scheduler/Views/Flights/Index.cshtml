@@ -2,64 +2,53 @@
 
 @{
     ViewData["Title"] = "Flights";
+    var createDisabledReason = TempData["CreateDisabledReason"] as string;
 }
 
-<h1>Index</h1>
+<h1>Flights</h1>
+
+@if (!string.IsNullOrEmpty(createDisabledReason))
+{
+    <div class="alert alert-warning">
+        @createDisabledReason
+    </div>
+}
 
 <p>
-    <a class="button-create" asp-action="Create">Create New</a>
+    @if (string.IsNullOrEmpty(createDisabledReason))
+    {
+        <a class="button-create" asp-action="Create">Create New</a>
+    }
+    else
+    {
+        <a class="button-create disabled" style="pointer-events:none;opacity:0.6;">Create New</a>
+    }
 </p>
+
 <table class="table">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Origin)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Destination)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DepartureTime)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ArrivalTime)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Gate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Airlines)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Aircraft)
-            </th>
+            <th>@Html.DisplayNameFor(model => model.Origin)</th>
+            <th>@Html.DisplayNameFor(model => model.Destination)</th>
+            <th>@Html.DisplayNameFor(model => model.DepartureTime)</th>
+            <th>@Html.DisplayNameFor(model => model.ArrivalTime)</th>
+            <th>@Html.DisplayNameFor(model => model.Gate)</th>
+            <th>@Html.DisplayNameFor(model => model.Airlines)</th>
+            <th>@Html.DisplayNameFor(model => model.Aircraft)</th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
+@foreach (var item in Model)
+{
         <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Origin)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Destination)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DepartureTime)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ArrivalTime)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Gate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Airlines.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Aircraft.Model)
-            </td>
+            <td>@Html.DisplayFor(modelItem => item.Origin)</td>
+            <td>@Html.DisplayFor(modelItem => item.Destination)</td>
+            <td>@Html.DisplayFor(modelItem => item.DepartureTime)</td>
+            <td>@Html.DisplayFor(modelItem => item.ArrivalTime)</td>
+            <td>@Html.DisplayFor(modelItem => item.Gate)</td>
+            <td>@Html.DisplayFor(modelItem => item.Airlines.Name)</td>
+            <td>@Html.DisplayFor(modelItem => item.Aircraft.Model)</td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
                 <a asp-action="Details" asp-route-id="@item.Id">Details</a> |

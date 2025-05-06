@@ -49,6 +49,16 @@ namespace Flight_Scheduler.Controllers
         // GET: Flights/Create
         public async Task<IActionResult> Create()
         {
+            var hasAircrafts = await _context.Aircrafts.AnyAsync();
+            var hasAirlines = await _context.Airline.AnyAsync();
+            var hasCrew = await _context.FlightCrews.AnyAsync();
+
+            if (!hasAircrafts || !hasAirlines || !hasCrew)
+            {
+                TempData["CreateDisabledReason"] = "To create a flight, at least one aircraft, airline, and crewmember must exist.";
+                return RedirectToAction(nameof(Index));
+            }
+
             await PopulateDropdowns();
             return View();
         }

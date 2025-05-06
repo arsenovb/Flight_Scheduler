@@ -11,36 +11,50 @@
     <div class="form-group">
         <label asp-for="Origin"></label>
         <input asp-for="Origin" class="form-control" />
+        <span asp-validation-for="Origin" class="text-danger"></span>
+
     </div>
 
     <div class="form-group">
         <label asp-for="Destination"></label>
         <input asp-for="Destination" class="form-control" />
+        <span asp-validation-for="Destination" class="text-danger"></span>
+
     </div>
 
     <div class="form-group">
         <label asp-for="DepartureTime"></label>
         <input asp-for="DepartureTime" type="datetime-local" class="form-control" />
+        <span asp-validation-for="DepartureTime" class="text-danger"></span>
+
     </div>
 
     <div class="form-group">
         <label asp-for="ArrivalTime"></label>
         <input asp-for="ArrivalTime" type="datetime-local" class="form-control" />
+        <span asp-validation-for="ArrivalTime" class="text-danger"></span>
+
     </div>
 
     <div class="form-group">
         <label asp-for="Gate"></label>
         <input asp-for="Gate" class="form-control" />
+        <span asp-validation-for="Gate" class="text-danger"></span>
+
     </div>
 
     <div class="form-group">
         <label asp-for="AirlineId">Airline</label>
         <select asp-for="AirlineId" asp-items="ViewBag.AirlineId" class="form-control"></select>
+        <span asp-validation-for="AirlineId" class="text-danger"></span>
+
     </div>
 
     <div class="form-group">
         <label asp-for="AircraftId">Aircraft</label>
         <select asp-for="AircraftId" asp-items="ViewBag.AircraftId" class="form-control" id="aircraftSelect"></select>
+        <span asp-validation-for="AircraftId" class="text-danger"></span>
+
     </div>
 
     <hr />
