@@ -1,40 +1,31 @@
-using Flight_Scheduler.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Flight_Scheduler.Data;
+using Flight_Scheduler.Models;
 using System.Diagnostics;
 
 namespace Flight_Scheduler.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly Flight_SchedulerContext _context;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(Flight_SchedulerContext context)
         {
-            _logger = logger;
+            _context = context;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var flights = await _context.Flight
+                .Include(f => f.Airlines)
+                .Include(f => f.Aircraft)
+                .ToListAsync();
+
+            return View(flights);
         }
 
         public IActionResult Privacy()
-        {
-            return View();
-        }
-        //public IActionResult Flights()
-        //{
-        //    return View();
-        //}
-        //public IActionResult Airlines()
-        //{
-        //    return View();
-        //}
-        //public IActionResult Aircraft()
-        //{
-        //    return View();
-        //}
-        public IActionResult FlightCrews()
         {
             return View();
         }
