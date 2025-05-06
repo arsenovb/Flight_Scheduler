@@ -22,6 +22,21 @@ namespace Flight_Scheduler.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("FlightFlightCrew", b =>
+                {
+                    b.Property<int>("FlightCrewsId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("FlightsId")
+                        .HasColumnType("int");
+
+                    b.HasKey("FlightCrewsId", "FlightsId");
+
+                    b.HasIndex("FlightsId");
+
+                    b.ToTable("FlightFlightCrew");
+                });
+
             modelBuilder.Entity("Flight_Scheduler.Models.Aircraft", b =>
                 {
                     b.Property<int>("Id")
@@ -93,9 +108,6 @@ namespace Flight_Scheduler.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("FlightCrewId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Gate")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -109,8 +121,6 @@ namespace Flight_Scheduler.Migrations
                     b.HasIndex("AircraftId");
 
                     b.HasIndex("AirlineId");
-
-                    b.HasIndex("FlightCrewId");
 
                     b.ToTable("Flight");
                 });
@@ -130,6 +140,9 @@ namespace Flight_Scheduler.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsAvailable")
+                        .HasColumnType("bit");
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -141,6 +154,21 @@ namespace Flight_Scheduler.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("FlightCrews");
+                });
+
+            modelBuilder.Entity("FlightFlightCrew", b =>
+                {
+                    b.HasOne("Flight_Scheduler.Models.FlightCrew", null)
+                        .WithMany()
+                        .HasForeignKey("FlightCrewsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Flight_Scheduler.Models.Flight", null)
+                        .WithMany()
+                        .HasForeignKey("FlightsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Flight_Scheduler.Models.Flight", b =>
@@ -157,17 +185,9 @@ namespace Flight_Scheduler.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Flight_Scheduler.Models.FlightCrew", "FlightCrew")
-                        .WithMany("Flights")
-                        .HasForeignKey("FlightCrewId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Aircraft");
 
                     b.Navigation("Airlines");
-
-                    b.Navigation("FlightCrew");
                 });
 
             modelBuilder.Entity("Flight_Scheduler.Models.Aircraft", b =>
@@ -176,11 +196,6 @@ namespace Flight_Scheduler.Migrations
                 });
 
             modelBuilder.Entity("Flight_Scheduler.Models.Airline", b =>
-                {
-                    b.Navigation("Flights");
-                });
-
-            modelBuilder.Entity("Flight_Scheduler.Models.FlightCrew", b =>
                 {
                     b.Navigation("Flights");
                 });

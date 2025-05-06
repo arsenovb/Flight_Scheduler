@@ -1,65 +1,135 @@
 ﻿@model Flight_Scheduler.Models.Flight
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Create Flight";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Create</h1>
+<h1>Create Flight</h1>
 
-<h4>Flight</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Origin" class="control-label"></label>
-                <input asp-for="Origin" class="form-control" />
-                <span asp-validation-for="Origin" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Destination" class="control-label"></label>
-                <input asp-for="Destination" class="form-control" />
-                <span asp-validation-for="Destination" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="DepartureTime" class="control-label"></label>
-                <input asp-for="DepartureTime" class="form-control" />
-                <span asp-validation-for="DepartureTime" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ArrivalTime" class="control-label"></label>
-                <input asp-for="ArrivalTime" class="form-control" />
-                <span asp-validation-for="ArrivalTime" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Gate" class="control-label"></label>
-                <input asp-for="Gate" class="form-control" />
-                <span asp-validation-for="Gate" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Airlines" class="control-label"></label>
-                <select asp-for="AirlineId" class ="form-control" asp-items="ViewBag.AirlineId"></select>
-            </div>
-            <div class="form-group">
-                <label asp-for="AircraftId" class="control-label"></label>
-                <select asp-for="AircraftId" class ="form-control" asp-items="ViewBag.AircraftId"></select>
-            </div>
-            <div class="form-group">
-                <label asp-for="FlightCrewId" class="control-label"></label>
-                <select asp-for="FlightCrewId" class ="form-control" asp-items="ViewBag.FlightCrewId"></select>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+<form asp-action="Create" method="post">
+    <div class="form-group">
+        <label asp-for="Origin"></label>
+        <input asp-for="Origin" class="form-control" />
     </div>
-</div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
+    <div class="form-group">
+        <label asp-for="Destination"></label>
+        <input asp-for="Destination" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="DepartureTime"></label>
+        <input asp-for="DepartureTime" type="datetime-local" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="ArrivalTime"></label>
+        <input asp-for="ArrivalTime" type="datetime-local" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Gate"></label>
+        <input asp-for="Gate" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="AirlineId">Airline</label>
+        <select asp-for="AirlineId" asp-items="ViewBag.AirlineId" class="form-control"></select>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="AircraftId">Aircraft</label>
+        <select asp-for="AircraftId" asp-items="ViewBag.AircraftId" class="form-control" id="aircraftSelect"></select>
+    </div>
+
+    <hr />
+    <h4>Assign Crew</h4>
+
+    <div id="crewFieldsContainer"></div>
+
+    <button type="submit" class="btn btn-primary">Create</button>
+</form>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        const aircraftSelect = document.getElementById("aircraftSelect");
+        const crewFieldsContainer = document.getElementById("crewFieldsContainer");
+
+        const captains = @Html.Raw(Json.Serialize(ViewBag.Captains));
+        const firstOfficers = @Html.Raw(Json.Serialize(ViewBag.FirstOfficers));
+        const otherCrew = @Html.Raw(Json.Serialize(ViewBag.OtherCrew));
+        const aircraftCapacities = @Html.Raw(Json.Serialize(ViewBag.AircraftCrewCapacities));
+
+        function createSelect(name, labelText, crewList) {
+            const wrapper = document.createElement("div");
+            wrapper.className = "form-group";
+
+            const label = document.createElement("label");
+            label.textContent = labelText;
+
+            const select = document.createElement("select");
+            select.name = name;
+            select.className = "form-control crew-select";
+
+            const emptyOption = document.createElement("option");
+            emptyOption.value = "";
+            emptyOption.text = "-- Select Crew Member --";
+            select.appendChild(emptyOption);
+
+            crewList.forEach(item => {
+                const option = document.createElement("option");
+                option.value = item.value;
+                option.text = item.text;
+                select.appendChild(option);
+            });
+
+            wrapper.appendChild(label);
+            wrapper.appendChild(select);
+            return wrapper;
+        }
+
+        function renderCrewFields(capacity) {
+            crewFieldsContainer.innerHTML = "";
+
+            if (capacity >= 1) {
+                crewFieldsContainer.appendChild(createSelect("CaptainId", "Captain", captains));
+            }
+
+            if (capacity >= 2) {
+                crewFieldsContainer.appendChild(createSelect("FirstOfficerId", "First Officer", firstOfficers));
+            }
+
+            for (let i = 0; i < capacity - 2; i++) {
+                crewFieldsContainer.appendChild(createSelect("OtherCrewIds", `Crew Member ${i + 1}`, otherCrew));
+            }
+
+            // Prevent duplicate selection
+            document.querySelectorAll(".crew-select").forEach(select => {
+                select.addEventListener("change", () => {
+                    const selectedValues = Array.from(document.querySelectorAll(".crew-select")).map(s => s.value);
+                    document.querySelectorAll(".crew-select").forEach(sel => {
+                        const currentValue = sel.value;
+                        Array.from(sel.options).forEach(opt => {
+                            if (opt.value && opt.value !== currentValue && selectedValues.includes(opt.value)) {
+                                opt.disabled = true;
+                            } else {
+                                opt.disabled = false;
+                            }
+                        });
+                    });
+                });
+            });
+        }
+
+        aircraftSelect.addEventListener("change", function () {
+            const selectedId = parseInt(this.value);
+            const capacity = aircraftCapacities[selectedId] || 0;
+            renderCrewFields(capacity);
+        });
+
+        document.addEventListener("DOMContentLoaded", () => {
+            aircraftSelect.dispatchEvent(new Event("change"));
+        });
+    </script>
 }

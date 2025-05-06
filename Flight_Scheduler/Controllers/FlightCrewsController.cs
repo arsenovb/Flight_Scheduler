@@ -54,7 +54,7 @@ namespace Flight_Scheduler.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,FirstName,LastName,Age,Position")] FlightCrew flightCrew)
+        public async Task<IActionResult> Create([Bind("Id,FirstName,LastName,Age,Position,IsAvailable")] FlightCrew flightCrew)
         {
             if (ModelState.IsValid)
             {
@@ -86,7 +86,7 @@ namespace Flight_Scheduler.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,FirstName,LastName,Age,Position")] FlightCrew flightCrew)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,FirstName,LastName,Age,Position,IsAvailable")] FlightCrew flightCrew)
         {
             if (id != flightCrew.Id)
             {

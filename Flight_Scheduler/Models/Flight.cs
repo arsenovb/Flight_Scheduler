@@ -15,7 +15,6 @@
         public int AircraftId { get; set; }
         public virtual Aircraft? Aircraft { get; set; }
 
-        public int FlightCrewId { get; set; }
-        public virtual FlightCrew? FlightCrew { get; set; }
+        public virtual ICollection<FlightCrew> FlightCrews { get; set; } = new List<FlightCrew>();
     }
 }

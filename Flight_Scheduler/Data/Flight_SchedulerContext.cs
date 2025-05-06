@@ -26,7 +26,11 @@ namespace Flight_Scheduler.Data
 
             modelBuilder.Entity<FlightCrew>()
                 .Property(fc => fc.Position)
-                .HasConversion<string>(); 
+                .HasConversion<string>();
+
+            modelBuilder.Entity<Flight>()
+                .HasMany(f => f.FlightCrews)
+                .WithMany(fc => fc.Flights);
         }
     }
 }
