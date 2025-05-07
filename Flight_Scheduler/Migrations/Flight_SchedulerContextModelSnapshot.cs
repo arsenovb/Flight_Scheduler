@@ -84,7 +84,7 @@ namespace Flight_Scheduler.Migrations
                     b.ToTable("Airline");
                 });
 
-            modelBuilder.Entity("Flight_Scheduler.Models.Destination", b =>
+            modelBuilder.Entity("Flight_Scheduler.Models.Airport", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -99,7 +99,7 @@ namespace Flight_Scheduler.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Destinations");
+                    b.ToTable("Airports");
 
                     b.HasData(
                         new
@@ -178,12 +178,10 @@ namespace Flight_Scheduler.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Gate")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Origin")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("OriginId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -192,6 +190,8 @@ namespace Flight_Scheduler.Migrations
                     b.HasIndex("AirlineId");
 
                     b.HasIndex("DestinationId");
+
+                    b.HasIndex("OriginId");
 
                     b.ToTable("Flight");
                 });
@@ -256,10 +256,16 @@ namespace Flight_Scheduler.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Flight_Scheduler.Models.Destination", "Destination")
-                        .WithMany("Flights")
+                    b.HasOne("Flight_Scheduler.Models.Airport", "Destination")
+                        .WithMany("DestinationFlights")
                         .HasForeignKey("DestinationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Flight_Scheduler.Models.Airport", "Origin")
+                        .WithMany("OriginatingFlights")
+                        .HasForeignKey("OriginId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Aircraft");
@@ -267,6 +273,8 @@ namespace Flight_Scheduler.Migrations
                     b.Navigation("Airlines");
 
                     b.Navigation("Destination");
+
+                    b.Navigation("Origin");
                 });
 
             modelBuilder.Entity("Flight_Scheduler.Models.Aircraft", b =>
@@ -279,9 +287,11 @@ namespace Flight_Scheduler.Migrations
                     b.Navigation("Flights");
                 });
 
-            modelBuilder.Entity("Flight_Scheduler.Models.Destination", b =>
+            modelBuilder.Entity("Flight_Scheduler.Models.Airport", b =>
                 {
-                    b.Navigation("Flights");
+                    b.Navigation("DestinationFlights");
+
+                    b.Navigation("OriginatingFlights");
                 });
 #pragma warning restore 612, 618
         }

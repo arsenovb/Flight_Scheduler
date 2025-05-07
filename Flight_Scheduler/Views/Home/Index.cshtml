@@ -37,7 +37,7 @@
         @foreach (var flight in Model)
         {
             <tr>
-                <td>@flight.Origin</td>
+                <td>@flight.Origin.Name</td>
                 <td>@flight.Destination.Name</td>
                 <td>@flight.DepartureTime.ToString("g")</td>
                 <td>@flight.ArrivalTime.ToString("g")</td>

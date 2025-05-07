@@ -25,37 +25,41 @@ namespace Flight_Scheduler.Controllers
             var flights = await _context.Flight
                 .Include(f => f.Aircraft)
                 .Include(f => f.Airlines)
-                .Include(f => f.FlightCrews)
-                .Include(f => f.Destination) // Include Destination in the list
+                .Include(f => f.Origin)
+                .Include(f => f.Destination)
                 .ToListAsync();
+
             return View(flights);
         }
 
-        // GET: Flights/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null) return NotFound();
+            if (id == null)
+            {
+                return NotFound();
+            }
 
             var flight = await _context.Flight
-                .Include(f => f.Aircraft)
-                .Include(f => f.Airlines)
-                .Include(f => f.FlightCrews)
-                .Include(f => f.Destination) // Include Destination
+                .Include(f => f.Origin)  
+                .Include(f => f.Destination)  
+                .Include(f => f.Airlines)  
+                .Include(f => f.Aircraft)  
+                .Include(f => f.FlightCrews) 
                 .FirstOrDefaultAsync(m => m.Id == id);
 
-            if (flight == null) return NotFound();
+            if (flight == null)
+            {
+                return NotFound();
+            }
 
             return View(flight);
         }
-
         // GET: Flights/Create
         public async Task<IActionResult> Create()
         {
-            var hasAircrafts = await _context.Aircrafts.AnyAsync();
-            var hasAirlines = await _context.Airline.AnyAsync();
-            var hasCrew = await _context.FlightCrews.AnyAsync();
-
-            if (!hasAircrafts || !hasAirlines || !hasCrew)
+            if (!await _context.Aircrafts.AnyAsync() ||
+                !await _context.Airline.AnyAsync() ||
+                !await _context.FlightCrews.AnyAsync())
             {
                 TempData["CreateDisabledReason"] = "To create a flight, at least one aircraft, airline, and crewmember must exist.";
                 return RedirectToAction(nameof(Index));
@@ -69,24 +73,20 @@ namespace Flight_Scheduler.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
-            [Bind("Id,Origin,DestinationId,DepartureTime,ArrivalTime,Gate,AirlineId,AircraftId")] Flight flight,
-            int? CaptainId,
-            int? FirstOfficerId,
-            List<int> OtherCrewIds)
+            [Bind("Id,OriginId,DestinationId,DepartureTime,ArrivalTime,Gate,AirlineId,AircraftId")] Flight flight,
+            List<int> crewIds)
         {
-            var allCrewIds = new List<int>();
-            if (CaptainId.HasValue) allCrewIds.Add(CaptainId.Value);
-            if (FirstOfficerId.HasValue) allCrewIds.Add(FirstOfficerId.Value);
-            if (OtherCrewIds != null) allCrewIds.AddRange(OtherCrewIds);
-
-            if (allCrewIds.Count != allCrewIds.Distinct().Count())
-                ModelState.AddModelError("", "Duplicate crew members are not allowed.");
+            if (flight.OriginId == flight.DestinationId)
+                ModelState.AddModelError("DestinationId", "Origin and destination airports must be different.");
 
             var aircraft = await _context.Aircrafts.FindAsync(flight.AircraftId);
             if (aircraft == null)
                 ModelState.AddModelError("AircraftId", "Aircraft not found.");
-            else if (allCrewIds.Count > aircraft.CrewCapacity)
+            else if (crewIds.Count > aircraft.CrewCapacity)
                 ModelState.AddModelError("", $"Too many crew members. Aircraft capacity: {aircraft.CrewCapacity}.");
+
+            if (crewIds.Count != crewIds.Distinct().Count())
+                ModelState.AddModelError("", "Duplicate crew members are not allowed.");
 
             if (!ModelState.IsValid)
             {
@@ -95,19 +95,19 @@ namespace Flight_Scheduler.Controllers
             }
 
             flight.FlightCrews = new List<FlightCrew>();
-            foreach (var crewId in allCrewIds.Distinct())
+            foreach (var crewId in crewIds.Distinct())
             {
                 var crew = await _context.FlightCrews.FindAsync(crewId);
                 if (crew != null && crew.IsAvailable)
                 {
                     crew.IsAvailable = false;
+                    _context.Entry(crew).State = EntityState.Modified;
                     flight.FlightCrews.Add(crew);
                 }
             }
 
-            _context.Flight.Add(flight);
+            _context.Add(flight);
             await _context.SaveChangesAsync();
-
             return RedirectToAction(nameof(Index));
         }
 
@@ -116,43 +116,80 @@ namespace Flight_Scheduler.Controllers
         {
             if (id == null) return NotFound();
 
-            var flight = await _context.Flight.FindAsync(id);
+            var flight = await _context.Flight
+                .Include(f => f.FlightCrews)
+                .FirstOrDefaultAsync(f => f.Id == id);
+
             if (flight == null) return NotFound();
 
-            ViewData["AircraftId"] = new SelectList(_context.Aircrafts, "Id", "Model", flight.AircraftId);
-            ViewData["AirlineId"] = new SelectList(_context.Airline, "Id", "Name", flight.AirlineId);
-            ViewData["DestinationId"] = new SelectList(_context.Destinations, "Id", "Name", flight.DestinationId);
-
+            await PopulateDropdowns(flight);
             return View(flight);
         }
 
         // POST: Flights/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Origin,DestinationId,DepartureTime,ArrivalTime,Gate,AirlineId,AircraftId")] Flight flight)
+        public async Task<IActionResult> Edit(
+            int id,
+            [Bind("Id,OriginId,DestinationId,DepartureTime,ArrivalTime,Gate,AirlineId,AircraftId")] Flight flight,
+            List<int> crewIds)
         {
             if (id != flight.Id) return NotFound();
 
-            if (ModelState.IsValid)
+            var existingFlight = await _context.Flight
+                .Include(f => f.FlightCrews)
+                .FirstOrDefaultAsync(f => f.Id == id);
+
+            if (existingFlight == null) return NotFound();
+
+            if (flight.OriginId == flight.DestinationId)
+                ModelState.AddModelError("DestinationId", "Origin and destination airports must be different.");
+
+            var aircraft = await _context.Aircrafts.FindAsync(flight.AircraftId);
+            if (aircraft == null)
+                ModelState.AddModelError("AircraftId", "Aircraft not found.");
+            else if (crewIds.Count > aircraft.CrewCapacity)
+                ModelState.AddModelError("", $"Too many crew members. Aircraft capacity: {aircraft.CrewCapacity}.");
+
+            if (crewIds.Count != crewIds.Distinct().Count())
+                ModelState.AddModelError("", "Duplicate crew members are not allowed.");
+
+            if (!ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(flight);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!FlightExists(flight.Id)) return NotFound();
-                    else throw;
-                }
-                return RedirectToAction(nameof(Index));
+                flight.FlightCrews = existingFlight.FlightCrews;
+                await PopulateDropdowns(flight);
+                return View(flight);
             }
 
-            ViewData["AircraftId"] = new SelectList(_context.Aircrafts, "Id", "Model", flight.AircraftId);
-            ViewData["AirlineId"] = new SelectList(_context.Airline, "Id", "Name", flight.AirlineId);
-            ViewData["DestinationId"] = new SelectList(_context.Destinations, "Id", "Name", flight.DestinationId);
+            // Reset previous crew availability
+            //foreach (var oldCrew in existingFlight.FlightCrews)
+            //{
+            //    oldCrew.IsAvailable = true;
+            //}
 
-            return View(flight);
+            //existingFlight.FlightCrews.Clear();
+
+            foreach (var crewId in crewIds.Distinct())
+            {
+                var crew = await _context.FlightCrews.FindAsync(crewId);
+                if (crew != null && crew.IsAvailable)
+                {
+                    crew.IsAvailable = false;
+                    existingFlight.FlightCrews.Add(crew);
+                }
+            }
+
+            
+            existingFlight.OriginId = flight.OriginId;
+            existingFlight.DestinationId = flight.DestinationId;
+            existingFlight.DepartureTime = flight.DepartureTime;
+            existingFlight.ArrivalTime = flight.ArrivalTime;
+            existingFlight.Gate = flight.Gate;
+            existingFlight.AirlineId = flight.AirlineId;
+            existingFlight.AircraftId = flight.AircraftId;
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Flights/Delete/5
@@ -164,7 +201,8 @@ namespace Flight_Scheduler.Controllers
                 .Include(f => f.Aircraft)
                 .Include(f => f.Airlines)
                 .Include(f => f.FlightCrews)
-                .Include(f => f.Destination) // Include Destination
+                .Include(f => f.Origin)
+                .Include(f => f.Destination)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (flight == null) return NotFound();
@@ -186,6 +224,7 @@ namespace Flight_Scheduler.Controllers
                 foreach (var crew in flight.FlightCrews)
                 {
                     crew.IsAvailable = true;
+                    _context.Entry(crew).State = EntityState.Modified;
                 }
 
                 _context.Flight.Remove(flight);
@@ -195,36 +234,58 @@ namespace Flight_Scheduler.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        private async Task PopulateDropdowns(Flight? flight = null)
+        {
+            ViewData["AircraftId"] = new SelectList(_context.Aircrafts, "Id", "Model", flight?.AircraftId);
+            ViewData["AirlineId"] = new SelectList(_context.Airline, "Id", "Name", flight?.AirlineId);
+            ViewData["OriginId"] = new SelectList(_context.Airports, "Id", "Name", flight?.OriginId);
+            ViewData["DestinationId"] = new SelectList(_context.Airports, "Id", "Name", flight?.DestinationId);
+
+            var allCrew = await _context.FlightCrews.ToListAsync();
+            var aircraftCapacities = await _context.Aircrafts.ToDictionaryAsync(a => a.Id, a => a.CrewCapacity);
+
+
+            ViewBag.Captains = allCrew
+                .Where(c => c.Position.ToString() == "Captain")
+                .Select(c => new SelectListItem
+                {
+                    Value = c.Id.ToString(),
+                    Text = $"{c.FirstName} {c.LastName} ({c.Position})"
+                }).ToList();
+
+            ViewBag.FirstOfficers = allCrew
+                .Where(c => c.Position.ToString() == "FirstOfficer")
+                .Select(c => new SelectListItem
+                {
+                    Value = c.Id.ToString(),
+                    Text = $"{c.FirstName} {c.LastName} ({c.Position})"
+                }).ToList();
+
+            ViewBag.OtherCrew = allCrew
+                .Where(c => c.Position.ToString() != "Captain" && c.Position.ToString() != "FirstOfficer")
+                .Select(c => new SelectListItem
+                {
+                    Value = c.Id.ToString(),
+                    Text = $"{c.FirstName} {c.LastName} ({c.Position})"
+                }).ToList();
+
+            ViewBag.AircraftCrewCapacities = aircraftCapacities;
+
+            if (flight != null)
+            {
+                var crewIds = flight.FlightCrews.Select(fc => fc.Id).ToList();
+
+                ViewBag.SelectedCaptainId = flight.FlightCrews.FirstOrDefault(fc => fc.Position.ToString() == "Captain")?.Id;
+                ViewBag.SelectedFirstOfficerId = flight.FlightCrews.FirstOrDefault(fc => fc.Position.ToString() == "FirstOfficer")?.Id;
+                ViewBag.SelectedOtherCrewIds = flight.FlightCrews
+                    .Where(fc => fc.Position.ToString() != "Captain" && fc.Position.ToString() != "FirstOfficer")
+                    .Select(fc => fc.Id).ToList();
+            }
+        }
+
         private bool FlightExists(int id)
         {
             return _context.Flight.Any(e => e.Id == id);
-        }
-
-        private async Task PopulateDropdowns()
-        {
-            ViewData["AircraftId"] = new SelectList(_context.Aircrafts, "Id", "Model");
-            ViewData["AirlineId"] = new SelectList(_context.Airline, "Id", "Name");
-            ViewData["DestinationId"] = new SelectList(_context.Destinations, "Id", "Name");
-
-            ViewBag.Captains = await _context.FlightCrews
-                .Where(fc => fc.IsAvailable && fc.Position == FlightCrew.CrewPosition.Captain)
-                .Select(fc => new SelectListItem { Value = fc.Id.ToString(), Text = $"{fc.FirstName} {fc.LastName}" })
-                .ToListAsync();
-
-            ViewBag.FirstOfficers = await _context.FlightCrews
-                .Where(fc => fc.IsAvailable && fc.Position == FlightCrew.CrewPosition.FirstOfficer)
-                .Select(fc => new SelectListItem { Value = fc.Id.ToString(), Text = $"{fc.FirstName} {fc.LastName}" })
-                .ToListAsync();
-
-            ViewBag.OtherCrew = await _context.FlightCrews
-                .Where(fc => fc.IsAvailable &&
-                             fc.Position != FlightCrew.CrewPosition.Captain &&
-                             fc.Position != FlightCrew.CrewPosition.FirstOfficer)
-                .Select(fc => new SelectListItem { Value = fc.Id.ToString(), Text = $"{fc.FirstName} {fc.LastName}" })
-                .ToListAsync();
-
-            ViewBag.AircraftCrewCapacities = await _context.Aircrafts
-                .ToDictionaryAsync(a => a.Id, a => a.CrewCapacity);
         }
     }
 }

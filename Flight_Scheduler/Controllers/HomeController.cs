@@ -22,6 +22,7 @@ namespace Flight_Scheduler.Controllers
                 .Include(f => f.Airlines)
                 .Include(f => f.Aircraft)
                 .Include(f => f.Destination)
+                .Include(f => f.Origin)
                 .ToListAsync();
 
             return View(flights);

@@ -3,10 +3,12 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace Flight_Scheduler.Migrations
 {
     /// <inheritdoc />
-    public partial class DatabaseRework : Migration
+    public partial class AirportTable : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -42,7 +44,7 @@ namespace Flight_Scheduler.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Destinations",
+                name: "Airports",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -51,7 +53,7 @@ namespace Flight_Scheduler.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Destinations", x => x.Id);
+                    table.PrimaryKey("PK_Airports", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -77,11 +79,11 @@ namespace Flight_Scheduler.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Origin = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    OriginId = table.Column<int>(type: "int", nullable: false),
                     DestinationId = table.Column<int>(type: "int", nullable: false),
                     DepartureTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ArrivalTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Gate = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Gate = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     AirlineId = table.Column<int>(type: "int", nullable: false),
                     AircraftId = table.Column<int>(type: "int", nullable: false)
                 },
@@ -101,11 +103,17 @@ namespace Flight_Scheduler.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Flight_Destinations_DestinationId",
+                        name: "FK_Flight_Airports_DestinationId",
                         column: x => x.DestinationId,
-                        principalTable: "Destinations",
+                        principalTable: "Airports",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Flight_Airports_OriginId",
+                        column: x => x.OriginId,
+                        principalTable: "Airports",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -132,6 +140,23 @@ namespace Flight_Scheduler.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.InsertData(
+                table: "Airports",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { 1, "John F. Kennedy (JFK), New York" },
+                    { 2, "Los Angeles International (LAX), Los Angeles" },
+                    { 3, "Hartsfield-Jackson Atlanta (ATL), Atlanta" },
+                    { 4, "Heathrow Airport (LHR), London" },
+                    { 5, "Charles de Gaulle (CDG), Paris" },
+                    { 6, "Tokyo Haneda (HND), Tokyo" },
+                    { 7, "Dubai International (DXB), Dubai" },
+                    { 8, "Sydney Airport (SYD), Sydney" },
+                    { 9, "Changi Airport (SIN), Singapore" },
+                    { 10, "Hong Kong International (HKG), Hong Kong" }
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Flight_AircraftId",
                 table: "Flight",
@@ -146,6 +171,11 @@ namespace Flight_Scheduler.Migrations
                 name: "IX_Flight_DestinationId",
                 table: "Flight",
                 column: "DestinationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Flight_OriginId",
+                table: "Flight",
+                column: "OriginId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_FlightFlightCrew_FlightsId",
@@ -172,7 +202,7 @@ namespace Flight_Scheduler.Migrations
                 name: "Airline");
 
             migrationBuilder.DropTable(
-                name: "Destinations");
+                name: "Airports");
         }
     }
 }

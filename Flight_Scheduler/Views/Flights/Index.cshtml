@@ -9,9 +9,7 @@
 
 @if (!string.IsNullOrEmpty(createDisabledReason))
 {
-    <div class="alert alert-warning">
-        @createDisabledReason
-    </div>
+    <div class="alert alert-warning">@createDisabledReason</div>
 }
 
 <p>
@@ -21,40 +19,40 @@
     }
     else
     {
-        <a class="button-create disabled" style="pointer-events:none;opacity:0.6;">Create New</a>
+        <a class="disabled button-create" style="pointer-events:none;opacity:0.6;">Create New</a>
     }
 </p>
 
-<table class="table">
+<table class="table table-bordered">
     <thead>
         <tr>
-            <th>@Html.DisplayNameFor(model => model.Origin)</th>
-            <th>@Html.DisplayNameFor(model => model.Destination)</th>
-            <th>@Html.DisplayNameFor(model => model.DepartureTime)</th>
-            <th>@Html.DisplayNameFor(model => model.ArrivalTime)</th>
-            <th>@Html.DisplayNameFor(model => model.Gate)</th>
-            <th>@Html.DisplayNameFor(model => model.Airlines)</th>
-            <th>@Html.DisplayNameFor(model => model.Aircraft)</th>
-            <th></th>
+            <th>Origin</th>
+            <th>Destination</th>
+            <th>Departure</th>
+            <th>Arrival</th>
+            <th>Gate</th>
+            <th>Airline</th>
+            <th>Aircraft</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model)
-{
-        <tr>
-            <td>@Html.DisplayFor(modelItem => item.Origin)</td>
-            <td>@Html.DisplayFor(modelItem => item.Destination.Name)</td>
-            <td>@Html.DisplayFor(modelItem => item.DepartureTime)</td>
-            <td>@Html.DisplayFor(modelItem => item.ArrivalTime)</td>
-            <td>@Html.DisplayFor(modelItem => item.Gate)</td>
-            <td>@Html.DisplayFor(modelItem => item.Airlines.Name)</td>
-            <td>@Html.DisplayFor(modelItem => item.Aircraft.Model)</td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Origin?.Name</td>
+                <td>@item.Destination?.Name</td>
+                <td>@item.DepartureTime</td>
+                <td>@item.ArrivalTime</td>
+                <td>@item.Gate</td>
+                <td>@item.Airlines?.Name</td>
+                <td>@item.Aircraft?.Model</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

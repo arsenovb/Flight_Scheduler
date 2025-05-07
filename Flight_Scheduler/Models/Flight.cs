@@ -3,12 +3,14 @@
     public class Flight
     {
         public int Id { get; set; }
-        public string Origin { get; set; }
+        public int OriginId { get; set; }
+        public virtual Airport? Origin { get; set; }
+
         public int DestinationId { get; set; }
-        public virtual Destination? Destination { get; set; }
+        public virtual Airport? Destination { get; set; }
         public DateTime DepartureTime { get; set; }
         public DateTime ArrivalTime { get; set; }
-        public string Gate { get; set; }
+        public string? Gate { get; set; }
 
         public int AirlineId {  get; set; }
         public virtual Airline? Airlines { get; set; }

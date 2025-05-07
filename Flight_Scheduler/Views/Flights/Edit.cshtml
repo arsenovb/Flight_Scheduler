@@ -1,69 +1,152 @@
 ﻿@model Flight_Scheduler.Models.Flight
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Edit Flight";
 }
 
-<h1>Edit</h1>
+<h2>Edit Flight</h2>
 
-<h4>Flight</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="Id" />
 
-            <div class="form-group">
-                <label asp-for="Origin" class="control-label"></label>
-                <input asp-for="Origin" class="form-control" />
-            </div>
-
-            <div class="form-group">
-                <label asp-for="DestinationId" class="control-label">Destination</label>
-                <select asp-for="DestinationId" class="form-control" asp-items="ViewBag.DestinationId">
-                    <option value="">-- Select Destination --</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label asp-for="DepartureTime" class="control-label"></label>
-                <input asp-for="DepartureTime" type="datetime-local" class="form-control" />
-            </div>
-
-            <div class="form-group">
-                <label asp-for="ArrivalTime" class="control-label"></label>
-                <input asp-for="ArrivalTime" type="datetime-local" class="form-control" />
-            </div>
-
-            <div class="form-group">
-                <label asp-for="Gate" class="control-label"></label>
-                <input asp-for="Gate" class="form-control" />
-            </div>
-
-            <div class="form-group">
-                <label asp-for="AirlineId" class="control-label">Airline</label>
-                <select asp-for="AirlineId" class="form-control" asp-items="ViewBag.AirlineId"></select>
-            </div>
-
-            <div class="form-group">
-                <label asp-for="AircraftId" class="control-label">Aircraft</label>
-                <select asp-for="AircraftId" class="form-control" asp-items="ViewBag.AircraftId"></select>
-            </div>
-
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+    <div class="form-group">
+        <label asp-for="OriginId" class="control-label"></label>
+        <select asp-for="OriginId" class="form-control" asp-items="ViewBag.OriginId"></select>
+        <span asp-validation-for="OriginId" class="text-danger"></span>
     </div>
-</div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
+    <div class="form-group">
+        <label asp-for="DestinationId" class="control-label"></label>
+        <select asp-for="DestinationId" class="form-control" asp-items="ViewBag.DestinationId"></select>
+        <span asp-validation-for="DestinationId" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="DepartureTime" class="control-label"></label>
+        <input asp-for="DepartureTime" class="form-control" type="datetime-local" />
+        <span asp-validation-for="DepartureTime" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="ArrivalTime" class="control-label"></label>
+        <input asp-for="ArrivalTime" class="form-control" type="datetime-local" />
+        <span asp-validation-for="ArrivalTime" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Gate" class="control-label"></label>
+        <input asp-for="Gate" class="form-control" />
+        <span asp-validation-for="Gate" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="AirlineId" class="control-label"></label>
+        <select asp-for="AirlineId" class="form-control" asp-items="ViewBag.AirlineId"></select>
+        <span asp-validation-for="AirlineId" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="AircraftId" class="control-label"></label>
+        <select asp-for="AircraftId" class="form-control" asp-items="ViewBag.AircraftId" id="aircraftSelect"></select>
+        <span asp-validation-for="AircraftId" class="text-danger"></span>
+    </div>
+
+    <hr />
+    <h4>Crew Selection</h4>
+    <div id="crewFieldsContainer"></div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
 
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script>
+        const aircraftSelect = document.getElementById("aircraftSelect");
+        const crewFieldsContainer = document.getElementById("crewFieldsContainer");
+
+        const captains = @Html.Raw(Json.Serialize(ViewBag.Captains));
+        const firstOfficers = @Html.Raw(Json.Serialize(ViewBag.FirstOfficers));
+        const otherCrew = @Html.Raw(Json.Serialize(ViewBag.OtherCrew));
+        const aircraftCapacities = @Html.Raw(Json.Serialize(ViewBag.AircraftCrewCapacities));
+
+        const selectedCaptainId = @Html.Raw(Json.Serialize(ViewBag.SelectedCaptainId));
+        const selectedFirstOfficerId = @Html.Raw(Json.Serialize(ViewBag.SelectedFirstOfficerId));
+        const selectedOtherCrewIds = @Html.Raw(Json.Serialize(ViewBag.SelectedOtherCrewIds ?? new List<int>()));
+
+        function createSelect(name, labelText, crewList, selectedId = null) {
+            const wrapper = document.createElement("div");
+            wrapper.className = "form-group";
+
+            const label = document.createElement("label");
+            label.textContent = labelText;
+
+            const select = document.createElement("select");
+            select.name = name;
+            select.className = "form-control crew-select";
+
+            const emptyOption = document.createElement("option");
+            emptyOption.value = "";
+            emptyOption.text = "-- Select Crew Member --";
+            select.appendChild(emptyOption);
+
+            crewList.forEach(item => {
+                const option = document.createElement("option");
+                option.value = item.value;
+                option.text = item.text;
+                if (selectedId == item.value) option.selected = true;
+                select.appendChild(option);
+            });
+
+            wrapper.appendChild(label);
+            wrapper.appendChild(select);
+            return wrapper;
+        }
+
+        function renderCrewFields(capacity) {
+            crewFieldsContainer.innerHTML = "";
+
+            if (capacity >= 1) {
+                crewFieldsContainer.appendChild(createSelect("crewIds", "Captain", captains, selectedCaptainId));
+            }
+
+            if (capacity >= 2) {
+                crewFieldsContainer.appendChild(createSelect("crewIds", "First Officer", firstOfficers, selectedFirstOfficerId));
+            }
+
+            for (let i = 0; i < capacity - 2; i++) {
+                const selectedOther = selectedOtherCrewIds[i] || null;
+                crewFieldsContainer.appendChild(createSelect("crewIds", `Crew Member ${i + 1}`, otherCrew, selectedOther));
+            }
+
+            document.querySelectorAll(".crew-select").forEach(select => {
+                select.addEventListener("change", () => {
+                    const selectedValues = Array.from(document.querySelectorAll(".crew-select")).map(s => s.value);
+                    document.querySelectorAll(".crew-select").forEach(sel => {
+                        const currentValue = sel.value;
+                        Array.from(sel.options).forEach(opt => {
+                            if (opt.value && opt.value !== currentValue && selectedValues.includes(opt.value)) {
+                                opt.disabled = true;
+                            } else {
+                                opt.disabled = false;
+                            }
+                        });
+                    });
+                });
+            });
+        }
+
+        aircraftSelect.addEventListener("change", function () {
+            const selectedId = parseInt(this.value);
+            const capacity = aircraftCapacities[selectedId] || 0;
+            renderCrewFields(capacity);
+        });
+
+        document.addEventListener("DOMContentLoaded", () => {
+            aircraftSelect.dispatchEvent(new Event("change"));
+        });
+    </script>
 }

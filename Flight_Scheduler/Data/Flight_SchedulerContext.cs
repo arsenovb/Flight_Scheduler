@@ -20,7 +20,7 @@ namespace Flight_Scheduler.Data
         public DbSet<Aircraft> Aircrafts { get; set; } = default!;
         public DbSet<FlightCrew> FlightCrews { get; set; } = default!;
 
-        public DbSet<Destination> Destinations { get; set; } = default;
+        public DbSet<Airport> Airports { get; set; } = default!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -35,21 +35,28 @@ namespace Flight_Scheduler.Data
                 .WithMany(fc => fc.Flights);
 
             modelBuilder.Entity<Flight>()
-               .HasOne(f => f.Destination)
-               .WithMany(d => d.Flights)
-               .HasForeignKey(f => f.DestinationId);
+                .HasOne(f => f.Origin)
+                .WithMany(a => a.OriginatingFlights)
+                .HasForeignKey(f => f.OriginId)
+                .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Destination>().HasData(
-                new Destination { Id = 1, Name = "John F. Kennedy (JFK), New York" },
-                new Destination { Id = 2, Name = "Los Angeles International (LAX), Los Angeles" },
-                new Destination { Id = 3, Name = "Hartsfield-Jackson Atlanta (ATL), Atlanta" },
-                new Destination { Id = 4, Name = "Heathrow Airport (LHR), London" },
-                new Destination { Id = 5, Name = "Charles de Gaulle (CDG), Paris" },
-                new Destination { Id = 6, Name = "Tokyo Haneda (HND), Tokyo" },
-                new Destination { Id = 7, Name = "Dubai International (DXB), Dubai" },
-                new Destination { Id = 8, Name = "Sydney Airport (SYD), Sydney" },
-                new Destination { Id = 9, Name = "Changi Airport (SIN), Singapore" },
-                new Destination { Id = 10, Name = "Hong Kong International (HKG), Hong Kong" }
+            modelBuilder.Entity<Flight>()
+                .HasOne(f => f.Destination)
+                .WithMany(a => a.DestinationFlights)
+                .HasForeignKey(f => f.DestinationId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Airport>().HasData(
+                new Airport { Id = 1, Name = "John F. Kennedy (JFK), New York" },
+                new Airport { Id = 2, Name = "Los Angeles International (LAX), Los Angeles" },
+                new Airport { Id = 3, Name = "Hartsfield-Jackson Atlanta (ATL), Atlanta" },
+                new Airport { Id = 4, Name = "Heathrow Airport (LHR), London" },
+                new Airport { Id = 5, Name = "Charles de Gaulle (CDG), Paris" },
+                new Airport { Id = 6, Name = "Tokyo Haneda (HND), Tokyo" },
+                new Airport { Id = 7, Name = "Dubai International (DXB), Dubai" },
+                new Airport { Id = 8, Name = "Sydney Airport (SYD), Sydney" },
+                new Airport { Id = 9, Name = "Changi Airport (SIN), Singapore" },
+                new Airport { Id = 10, Name = "Hong Kong International (HKG), Hong Kong" }
             );
         }
     }
