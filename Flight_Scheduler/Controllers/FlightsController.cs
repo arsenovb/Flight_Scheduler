@@ -162,12 +162,12 @@ namespace Flight_Scheduler.Controllers
             }
 
             // Reset previous crew availability
-            //foreach (var oldCrew in existingFlight.FlightCrews)
-            //{
-            //    oldCrew.IsAvailable = true;
-            //}
+            foreach (var oldCrew in existingFlight.FlightCrews)
+            {
+                oldCrew.IsAvailable = true;
+            }
 
-            //existingFlight.FlightCrews.Clear();
+            existingFlight.FlightCrews.Clear();
 
             foreach (var crewId in crewIds.Distinct())
             {
