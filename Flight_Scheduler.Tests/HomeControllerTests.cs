@@ -24,7 +24,6 @@ namespace Flight_Scheduler.Tests
                 .Options;
 
             _context = new Flight_SchedulerContext(options);
-
             SeedTestData();
             _controller = new HomeController(_context);
         }
@@ -40,6 +39,7 @@ namespace Flight_Scheduler.Tests
         {
             var originAirport = new Airport { Id = 1, Name = "JFK" };
             var destinationAirport = new Airport { Id = 2, Name = "LAX" };
+
             var aircraft = new Aircraft
             {
                 Id = 1,
@@ -48,12 +48,14 @@ namespace Flight_Scheduler.Tests
                 PassengerCapacity = 150,
                 FuelTankCapacity = 20000
             };
+
             var airline = new Airline
             {
                 Id = 1,
                 Name = "Delta",
                 Country = "USA"
             };
+
             var flight = new Flight
             {
                 Id = 1,
@@ -75,19 +77,20 @@ namespace Flight_Scheduler.Tests
         {
             var result = await _controller.Index();
 
-            Assert.IsInstanceOf<ViewResult>(result);
-            var viewResult = result as ViewResult;
+            Assert.That(result, Is.TypeOf<ViewResult>());
 
-            Assert.IsInstanceOf<List<Flight>>(viewResult.Model);
+            var viewResult = result as ViewResult;
+            Assert.That(viewResult?.Model, Is.TypeOf<List<Flight>>());
+
             var model = viewResult.Model as List<Flight>;
-            Assert.AreEqual(1, model.Count);
+            Assert.That(model?.Count, Is.EqualTo(1));
         }
 
         [Test]
         public void PrivacyShouldReturnViewResult()
         {
             var result = _controller.Privacy();
-            Assert.IsInstanceOf<ViewResult>(result);
+            Assert.That(result, Is.TypeOf<ViewResult>());
         }
 
         [Test]
@@ -100,12 +103,13 @@ namespace Flight_Scheduler.Tests
 
             var result = _controller.Error();
 
-            Assert.IsInstanceOf<ViewResult>(result);
-            var viewResult = result as ViewResult;
+            Assert.That(result, Is.TypeOf<ViewResult>());
 
-            Assert.IsInstanceOf<ErrorViewModel>(viewResult.Model);
+            var viewResult = result as ViewResult;
+            Assert.That(viewResult?.Model, Is.TypeOf<ErrorViewModel>());
+
             var model = viewResult.Model as ErrorViewModel;
-            Assert.IsNotNull(model.RequestId);
+            Assert.That(model?.RequestId, Is.Not.Null.And.Not.Empty);
         }
     }
 }
