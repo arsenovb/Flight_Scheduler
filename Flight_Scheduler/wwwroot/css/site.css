@@ -8,10 +8,6 @@ html {
   }
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
 html {
   position: relative;
   min-height: 100%;
@@ -73,6 +69,10 @@ h1 {
     border-bottom: 1px solid #e0e0e0;
 }
 
+.nowrap {
+    white-space: nowrap;
+}
+
 .table thead {
     background-color: #f1f1f1;
 }
@@ -106,4 +106,50 @@ h1 {
 }
 img {
     border-radius: 25px;
+}
+
+.button {
+    padding: 5px;
+    color: black;
+    border-radius: 3px;
+    text-decoration: none;
+    font-weight: 500;
+    border-color:none;
+    transition: background-color 0.3s ease;
+}
+
+.button:hover {
+    background-color: darkslategray;
+    color: white
+}
+button {
+    padding: 5px;
+    color: black;
+    border-radius: 3px;
+    text-decoration: none;
+    font-weight: 500;
+    border-color: none;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: darkslategray;
+    color: white
+}
+.btn-primary {
+    border:none;
+    background-color:white;
+    margin: 10px;
+    padding: 5px;
+    color: black;
+    border-radius: 3px;
+    text-decoration: none;
+    font-weight: 500;
+    border-color: none;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: darkslategray;
+    color: white
 }
