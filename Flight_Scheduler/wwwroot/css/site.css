@@ -137,10 +137,13 @@ button:hover {
     color: white
 }
 .btn-primary {
-    border:none;
-    background-color:white;
-    margin: 10px;
+    border: none;
+    background-color: grey;
+    margin-top: 7px;
+    margin-bottom: 10px;
     padding: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
     color: black;
     border-radius: 3px;
     text-decoration: none;
@@ -150,6 +153,7 @@ button:hover {
 }
 
 .btn-primary:hover {
+    border: none;
     background-color: darkslategray;
     color: white
 }
