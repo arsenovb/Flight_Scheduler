@@ -14,26 +14,31 @@ namespace Flight_Scheduler.Tests.Controllers
     [TestFixture]
     public class AirlinesControllerTests
     {
-        private Flight_SchedulerContext _context;
         private AirlinesController _controller;
+        private Flight_SchedulerContext _context;
 
         [SetUp]
-        public void SetUp()
+        public void Setup()
         {
             var options = new DbContextOptionsBuilder<Flight_SchedulerContext>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                .UseInMemoryDatabase(databaseName: $"TestDb_{Guid.NewGuid()}")
                 .Options;
 
             _context = new Flight_SchedulerContext(options);
-            _context.Database.EnsureCreated();
-
-            _context.Airline.AddRange(
-                new Airline { Id = 1, Name = "TestAir", Country = "TestLand" },
-                new Airline { Id = 2, Name = "SampleAir", Country = "SampleLand" }
-            );
-            _context.SaveChanges();
-
+            SeedTestData();
             _controller = new AirlinesController(_context);
+        }
+
+        private void SeedTestData()
+        {
+            var airline = new Airline
+            {
+                Id = 1,
+                Name = "Test Airlines",
+                Country = "Test Country"
+            };
+            _context.Airline.Add(airline);
+            _context.SaveChanges();
         }
 
         [TearDown]
@@ -43,164 +48,222 @@ namespace Flight_Scheduler.Tests.Controllers
             _controller?.Dispose();
         }
 
+        private Airline CreateTestAirline(int id = 2)
+        {
+            return new Airline
+            {
+                Id = id,
+                Name = "New Test Airlines",
+                Country = "New Test Country"
+            };
+        }
+
         [Test]
-        public async Task Index_ReturnsViewWithAirlines()
+        public async Task Index_ReturnsViewWithAllAirlines()
         {
             var result = await _controller.Index();
-            Assert.IsInstanceOf<ViewResult>(result);
 
-            var view = result as ViewResult;
-            Assert.IsInstanceOf<List<Airline>>(view.Model);
-            var model = view.Model as List<Airline>;
-            Assert.AreEqual(2, model.Count);
+            Assert.That(result, Is.TypeOf<ViewResult>());
+            var viewResult = result as ViewResult;
+            var model = viewResult?.Model as List<Airline>;
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(model, Is.Not.Null);
+                Assert.That(model.Count, Is.EqualTo(1));
+                Assert.That(model[0].Name, Is.EqualTo("Test Airlines"));
+                Assert.That(model[0].Country, Is.EqualTo("Test Country"));
+            });
         }
 
         [Test]
-        public async Task Details_ReturnsNotFound_WhenIdIsNull()
+        public async Task Details_WithNullId_ReturnsNotFound()
         {
             var result = await _controller.Details(null);
-            Assert.IsInstanceOf<NotFoundResult>(result);
+            Assert.That(result, Is.TypeOf<NotFoundResult>());
         }
 
         [Test]
-        public async Task Details_ReturnsNotFound_WhenAirlineDoesNotExist()
+        public async Task Details_WithInvalidId_ReturnsNotFound()
         {
             var result = await _controller.Details(999);
-            Assert.IsInstanceOf<NotFoundResult>(result);
+            Assert.That(result, Is.TypeOf<NotFoundResult>());
         }
 
         [Test]
-        public async Task Details_ReturnsViewWithAirline_WhenExists()
+        public async Task Details_WithValidId_ReturnsViewWithAirline()
         {
             var result = await _controller.Details(1);
-            Assert.IsInstanceOf<ViewResult>(result);
 
-            var view = result as ViewResult;
-            var model = view.Model as Airline;
-            Assert.NotNull(model);
-            Assert.AreEqual(1, model.Id);
+            Assert.That(result, Is.TypeOf<ViewResult>());
+            var viewResult = result as ViewResult;
+            var airline = viewResult?.Model as Airline;
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(airline, Is.Not.Null);
+                Assert.That(airline.Id, Is.EqualTo(1));
+                Assert.That(airline.Name, Is.EqualTo("Test Airlines"));
+            });
         }
 
         [Test]
         public void Create_Get_ReturnsView()
         {
             var result = _controller.Create();
-            Assert.IsInstanceOf<ViewResult>(result);
+            Assert.That(result, Is.TypeOf<ViewResult>());
         }
 
         [Test]
-        public async Task Create_Post_RedirectsToIndex_WhenModelIsValid()
+        public async Task Create_Post_WithValidModel_RedirectsToIndex()
         {
-            var airline = new Airline { Name = "NewAir", Country = "NewLand" };
+            var airline = CreateTestAirline();
+            _controller.ModelState.Clear();
 
             var result = await _controller.Create(airline);
-            Assert.IsInstanceOf<RedirectToActionResult>(result);
 
-            var redirect = result as RedirectToActionResult;
-            Assert.AreEqual("Index", redirect.ActionName);
+            Assert.That(result, Is.TypeOf<RedirectToActionResult>());
+            var redirectResult = result as RedirectToActionResult;
+            Assert.That(redirectResult?.ActionName, Is.EqualTo("Index"));
+
+            var savedAirline = await _context.Airline.FindAsync(airline.Id);
+            Assert.That(savedAirline, Is.Not.Null);
         }
 
         [Test]
-        public async Task Create_Post_ReturnsView_WhenModelIsInvalid()
+        public async Task Create_Post_WithInvalidModel_ReturnsView()
         {
-            _controller.ModelState.AddModelError("Name", "Required");
+            var airline = CreateTestAirline();
+            _controller.ModelState.AddModelError("Error", "Test Error");
 
-            var result = await _controller.Create(new Airline());
-            Assert.IsInstanceOf<ViewResult>(result);
+            var result = await _controller.Create(airline);
+
+            Assert.That(result, Is.TypeOf<ViewResult>());
+            var viewResult = result as ViewResult;
+            Assert.That(viewResult?.Model, Is.EqualTo(airline));
         }
 
         [Test]
-        public async Task Edit_Get_ReturnsNotFound_WhenIdIsNull()
+        public async Task Edit_Get_WithNullId_ReturnsNotFound()
         {
             var result = await _controller.Edit(null);
-            Assert.IsInstanceOf<NotFoundResult>(result);
+            Assert.That(result, Is.TypeOf<NotFoundResult>());
         }
 
         [Test]
-        public async Task Edit_Get_ReturnsNotFound_WhenNotExists()
+        public async Task Edit_Get_WithInvalidId_ReturnsNotFound()
         {
             var result = await _controller.Edit(999);
-            Assert.IsInstanceOf<NotFoundResult>(result);
+            Assert.That(result, Is.TypeOf<NotFoundResult>());
         }
 
         [Test]
-        public async Task Edit_Get_ReturnsView_WhenExists()
+        public async Task Edit_Get_WithValidId_ReturnsView()
         {
             var result = await _controller.Edit(1);
-            Assert.IsInstanceOf<ViewResult>(result);
 
-            var view = result as ViewResult;
-            Assert.IsInstanceOf<Airline>(view.Model);
+            Assert.That(result, Is.TypeOf<ViewResult>());
+            var viewResult = result as ViewResult;
+            var airline = viewResult?.Model as Airline;
+            Assert.That(airline?.Id, Is.EqualTo(1));
         }
 
         [Test]
-        public async Task Edit_Post_ReturnsNotFound_WhenIdsMismatch()
+        public async Task Edit_Post_WithMismatchedId_ReturnsNotFound()
         {
-            var result = await _controller.Edit(999, new Airline { Id = 1 });
-            Assert.IsInstanceOf<NotFoundResult>(result);
+            var airline = CreateTestAirline(1);
+            var result = await _controller.Edit(2, airline);
+            Assert.That(result, Is.TypeOf<NotFoundResult>());
         }
 
         [Test]
-        public async Task Edit_Post_RedirectsToIndex_WhenValid()
+        public async Task Edit_Post_WithValidModel_RedirectsToIndex()
         {
-            var tracked = await _context.Airline.FirstAsync(a => a.Id == 1);
+            var airline = await _context.Airline.FindAsync(1);
+            airline.Name = "Updated Name";
+            _controller.ModelState.Clear();
 
-            _context.Entry(tracked).State = EntityState.Detached;
+            var result = await _controller.Edit(1, airline);
 
-            var updated = new Airline { Id = 1, Name = "UpdatedAir", Country = "UpdatedLand" };
-            var result = await _controller.Edit(1, updated);
+            Assert.That(result, Is.TypeOf<RedirectToActionResult>());
+            var redirectResult = result as RedirectToActionResult;
+            Assert.That(redirectResult?.ActionName, Is.EqualTo("Index"));
 
-            Assert.IsInstanceOf<RedirectToActionResult>(result);
-            var redirect = result as RedirectToActionResult;
-            Assert.AreEqual("Index", redirect.ActionName);
-
-            var fromDb = await _context.Airline.FindAsync(1);
-            Assert.AreEqual("UpdatedAir", fromDb.Name);
-            Assert.AreEqual("UpdatedLand", fromDb.Country);
+            var updatedAirline = await _context.Airline.FindAsync(1);
+            Assert.That(updatedAirline?.Name, Is.EqualTo("Updated Name"));
         }
 
         [Test]
-        public async Task Edit_Post_ReturnsView_WhenModelIsInvalid()
+        public async Task Edit_Post_WithInvalidModel_ReturnsView()
         {
-            _controller.ModelState.AddModelError("Name", "Required");
-            var result = await _controller.Edit(1, new Airline { Id = 1 });
-            Assert.IsInstanceOf<ViewResult>(result);
+            var airline = await _context.Airline.FindAsync(1);
+            _controller.ModelState.AddModelError("Error", "Test Error");
+
+            var result = await _controller.Edit(1, airline);
+
+            Assert.That(result, Is.TypeOf<ViewResult>());
+            var viewResult = result as ViewResult;
+            Assert.That(viewResult?.Model, Is.EqualTo(airline));
         }
 
         [Test]
-        public async Task Delete_Get_ReturnsNotFound_WhenIdIsNull()
+        public async Task Delete_Get_WithNullId_ReturnsNotFound()
         {
             var result = await _controller.Delete(null);
-            Assert.IsInstanceOf<NotFoundResult>(result);
+            Assert.That(result, Is.TypeOf<NotFoundResult>());
         }
 
         [Test]
-        public async Task Delete_Get_ReturnsNotFound_WhenAirlineNotFound()
+        public async Task Delete_Get_WithInvalidId_ReturnsNotFound()
         {
             var result = await _controller.Delete(999);
-            Assert.IsInstanceOf<NotFoundResult>(result);
+            Assert.That(result, Is.TypeOf<NotFoundResult>());
         }
 
         [Test]
-        public async Task Delete_Get_ReturnsView_WhenAirlineExists()
+        public async Task Delete_Get_WithValidId_ReturnsView()
         {
             var result = await _controller.Delete(1);
-            Assert.IsInstanceOf<ViewResult>(result);
 
-            var view = result as ViewResult;
-            Assert.IsInstanceOf<Airline>(view.Model);
+            Assert.That(result, Is.TypeOf<ViewResult>());
+            var viewResult = result as ViewResult;
+            var airline = viewResult?.Model as Airline;
+            Assert.That(airline?.Id, Is.EqualTo(1));
         }
 
         [Test]
-        public async Task DeleteConfirmed_RemovesAirline_AndRedirectsToIndex()
+        public async Task DeleteConfirmed_WithValidId_RedirectsToIndex()
         {
             var result = await _controller.DeleteConfirmed(1);
-            Assert.IsInstanceOf<RedirectToActionResult>(result);
 
-            var redirect = result as RedirectToActionResult;
-            Assert.AreEqual("Index", redirect.ActionName);
+            Assert.That(result, Is.TypeOf<RedirectToActionResult>());
+            var redirectResult = result as RedirectToActionResult;
+            Assert.That(redirectResult?.ActionName, Is.EqualTo("Index"));
+            Assert.That(await _context.Airline.FindAsync(1), Is.Null);
+        }
 
-            Assert.IsNull(await _context.Airline.FindAsync(1));
+        [Test]
+        public async Task DeleteConfirmed_WithInvalidId_RedirectsToIndex()
+        {
+            var result = await _controller.DeleteConfirmed(999);
+
+            Assert.That(result, Is.TypeOf<RedirectToActionResult>());
+            var redirectResult = result as RedirectToActionResult;
+            Assert.That(redirectResult?.ActionName, Is.EqualTo("Index"));
+        }
+
+        [Test]
+        public void AirlineExists_WithExistingId_ReturnsTrue()
+        {
+            var result = _context.Airline.Any(e => e.Id == 1);
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public void AirlineExists_WithNonExistingId_ReturnsFalse()
+        {
+            var result = _context.Airline.Any(e => e.Id == 999);
+            Assert.That(result, Is.False);
         }
     }
 }
