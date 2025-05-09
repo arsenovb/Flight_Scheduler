@@ -25,7 +25,7 @@ namespace Flight_Scheduler.Controllers
             return View(await _context.Aircrafts.ToListAsync());
         }
 
-        // GET: Aircraft/Details/5
+        // GET: Aircraft/Details
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -50,8 +50,6 @@ namespace Flight_Scheduler.Controllers
         }
 
         // POST: Aircraft/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Model,CrewCapacity,PassengerCapacity,FuelTankCapacity")] Aircraft aircraft)
@@ -65,7 +63,7 @@ namespace Flight_Scheduler.Controllers
             return View(aircraft);
         }
 
-        // GET: Aircraft/Edit/5
+        // GET: Aircraft/Edit
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -81,9 +79,7 @@ namespace Flight_Scheduler.Controllers
             return View(aircraft);
         }
 
-        // POST: Aircraft/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // POST: Aircraft/Edit
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Model,CrewCapacity,PassengerCapacity,FuelTankCapacity")] Aircraft aircraft)
@@ -116,7 +112,7 @@ namespace Flight_Scheduler.Controllers
             return View(aircraft);
         }
 
-        // GET: Aircraft/Delete/5
+        // GET: Aircraft/Delete
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -134,7 +130,7 @@ namespace Flight_Scheduler.Controllers
             return View(aircraft);
         }
 
-        // POST: Aircraft/Delete/5
+        // POST: Aircraft/Delete
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

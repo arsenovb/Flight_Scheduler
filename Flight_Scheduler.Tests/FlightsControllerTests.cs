@@ -30,7 +30,6 @@ namespace Flight_Scheduler.Tests.Controllers
 
             context = new Flight_SchedulerContext(options);
 
-            // Initialize TempData
             tempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
 
             SeedTestData();
@@ -114,7 +113,7 @@ namespace Flight_Scheduler.Tests.Controllers
         [Test]
         public async Task CreateShouldRedirectToIndexWhenPrerequisiteDataMissing()
         {
-            // Remove all prerequisite data
+            // Remove all data
             context.Aircrafts.RemoveRange(context.Aircrafts);
             context.Airline.RemoveRange(context.Airline);
             context.FlightCrews.RemoveRange(context.FlightCrews);
@@ -131,7 +130,7 @@ namespace Flight_Scheduler.Tests.Controllers
         [Test]
         public async Task CreateShouldReturnViewWhenDataIsValid()
         {
-            // Adding necessary prerequisite data for a valid creation
+            // Adding necessary data 
             var aircraft = new Aircraft { Id = 2, Model = "Boeing 747", CrewCapacity = 10, PassengerCapacity = 200, FuelTankCapacity = 30000 };
             var airline = new Airline { Id = 2, Name = "TestAirline2", Country = "TestCountry2" };
             var crew1 = new FlightCrew { Id = 3, FirstName = "Mike", LastName = "Johnson", Age = 40, IsAvailable = true, Position = FlightCrew.CrewPosition.Captain };

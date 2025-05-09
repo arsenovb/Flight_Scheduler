@@ -25,7 +25,7 @@ namespace Flight_Scheduler.Controllers
             return View(await _context.FlightCrews.ToListAsync());
         }
 
-        // GET: FlightCrews/Details/5
+        // GET: FlightCrews/Details
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -50,8 +50,6 @@ namespace Flight_Scheduler.Controllers
         }
 
         // POST: FlightCrews/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,FirstName,LastName,Age,Position,IsAvailable")] FlightCrew flightCrew)
@@ -65,7 +63,7 @@ namespace Flight_Scheduler.Controllers
             return View(flightCrew);
         }
 
-        // GET: FlightCrews/Edit/5
+        // GET: FlightCrews/Edit
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -81,9 +79,7 @@ namespace Flight_Scheduler.Controllers
             return View(flightCrew);
         }
 
-        // POST: FlightCrews/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // POST: FlightCrews/Edit
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,FirstName,LastName,Age,Position,IsAvailable")] FlightCrew flightCrew)
@@ -116,7 +112,7 @@ namespace Flight_Scheduler.Controllers
             return View(flightCrew);
         }
 
-        // GET: FlightCrews/Delete/5
+        // GET: FlightCrews/Delete
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -134,7 +130,7 @@ namespace Flight_Scheduler.Controllers
             return View(flightCrew);
         }
 
-        // POST: FlightCrews/Delete/5
+        // POST: FlightCrews/Delete
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

@@ -113,7 +113,6 @@ namespace Flight_Scheduler.Controllers
 
             if (flight == null) return NotFound();
 
-            // Temporarily mark current crew as available for re-selection
             foreach (var crew in flight.FlightCrews)
             {
                 crew.IsAvailable = true;

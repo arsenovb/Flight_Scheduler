@@ -25,7 +25,7 @@ namespace Flight_Scheduler.Controllers
             return View(await _context.Airline.ToListAsync());
         }
 
-        // GET: Airlines/Details/5
+        // GET: Airlines/Details
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -50,8 +50,6 @@ namespace Flight_Scheduler.Controllers
         }
 
         // POST: Airlines/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Name,Country")] Airline airline)
@@ -65,7 +63,7 @@ namespace Flight_Scheduler.Controllers
             return View(airline);
         }
 
-        // GET: Airlines/Edit/5
+        // GET: Airlines/Edit
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -81,9 +79,7 @@ namespace Flight_Scheduler.Controllers
             return View(airline);
         }
 
-        // POST: Airlines/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // POST: Airlines/Edit
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Country")] Airline airline)
@@ -116,7 +112,7 @@ namespace Flight_Scheduler.Controllers
             return View(airline);
         }
 
-        // GET: Airlines/Delete/5
+        // GET: Airlines/Delete
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -134,7 +130,7 @@ namespace Flight_Scheduler.Controllers
             return View(airline);
         }
 
-        // POST: Airlines/Delete/5
+        // POST: Airlines/Delete
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
